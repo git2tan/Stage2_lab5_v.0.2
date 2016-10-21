@@ -71,8 +71,8 @@ void main()
 	head = creatHeadFirstList();
 	printf("Now we begin to first fill the list of list. Input elem or input \"exit\" for break input\n");
 
-	secondFillFirstList(head);
-	//loadFromFile(head);
+	//secondFillFirstList(head);
+	loadFromFile(head);
 	showFirstList(head);
 	/*int tmp = 4;
 	showOneFirstList(findPtrFirstListForInput(head,tmp));
@@ -131,6 +131,14 @@ SecondList * creatElemSecondList()
 	SecondList *tmp = (SecondList*)malloc(sizeof(SecondList)); //выделяем память под элемент списка второго уровня
 	tmp->content = tmpc;
 	tmp->next=NULL;
+	return tmp;
+}
+SecondList * creatCleanElemSecList() 
+{
+	SecondList *tmp = (SecondList*)malloc(sizeof(SecondList));
+	tmp->content = NULL;
+	tmp->next = NULL;
+	tmp->indx = NULL;
 	return tmp;
 }
 char * getInput()
@@ -327,6 +335,7 @@ void inputByNumber(FirstList * head, SecondList * paste, int numb)
 		for (; tailPtr->next != NULL; tailPtr = tailPtr->next);//находим хвостовой элемент первого списка
 		addToTailOfLists(tailPtr, paste);
 	}
+	
 	else
 	{
 		//не в конец списка
@@ -376,15 +385,23 @@ void inputByNumber(FirstList * head, SecondList * paste, int numb)
 				//ищем в который из них хотим установить
 				FLptr = findPtrFirstListForInput(FLptr, numb);
 			}
-			if (FLptr->contain + 1 < FLptr->max) //переполнения не будет
+			if (FLptr->contain + 1 <= FLptr->max) //переполнения не будет
 			{
 				if (numb == FLptr->contain)
 				{
 					addToTailOfLists(FLptr, paste);
 				}
+				if (numb == 0)
+				{
+					//printf("I caught him\n");
+					paste->next = FLptr->headOFSecondList;
+					FLptr->headOFSecondList = paste;
+					FLptr->contain++;
+				}
+
 				else
 				{
-					SecondList * tmpSLptr;
+					SecondList * tmpSLptr;	// создали указатель на элемент второго уровня
 					tmpSLptr = FLptr->headOFSecondList;
 					for (int i = numb-1; i > 0; i--)
 					{
@@ -487,7 +504,7 @@ void printTheFile()
 	while (true)
 	{
 		int contain = 0;
-		char tmp[255];
+		//char tmp[255];
 		fscanf(fd, "%d",&contain);
 		if (contain == 0)
 			break;
@@ -528,11 +545,11 @@ void loadFromFile(FirstList * head)
 	int i = 0;
 	int max;
 	fscanf(fd, "%d", &max);
-	printf("Max:%d\n", max);
-
 	start->max = max;
+	printf("load max = %d\n", max);
 	int contain = 0;
 	fscanf(fd, "%d", &contain);
+	printf("Load contain %d\n", contain);
 	if (contain == 0)
 	{
 	}
@@ -540,16 +557,16 @@ void loadFromFile(FirstList * head)
 	{
 		while (true)
 		{
-			
+			start->contain = 0;
 			//printf("%d\n", contain);
 			getc(fd); // считываем лишний '\n' из файла после цифры
 
-			for (int i = 0; i < contain; i++)
+			for (int k = 0; k < contain; k++)
 			{
 				char buf[255] = { 0 };
 				char * returnableBuf;
 				SecondList *tmp;
-				tmp = creatElemSecondList();
+				tmp = creatCleanElemSecList();
 				int j = 0;
 				while (true)
 				{
@@ -563,12 +580,13 @@ void loadFromFile(FirstList * head)
 				int bufsize = (strlen(buf) + 1);
 				returnableBuf = (char*)malloc(sizeof(char)*bufsize);
 				strcpy(returnableBuf, buf);
-				//printf("%s\n", returnableBuf);
 				tmp->content = returnableBuf;
 				tmp->indx = i++;
 				addToTailOfLists(start,tmp);
-
+				printf("Add %s\n", returnableBuf);
+				//start->contain++;
 			}
+			contain = 0;
 			fscanf(fd, "%d", &contain);
 			if (contain == 0)
 				break;
