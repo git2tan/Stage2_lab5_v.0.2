@@ -59,6 +59,9 @@ int getcountsAllOfSecList(FirstList * head);
 FirstList * findPtrFirstListForInput(FirstList * head, int &number); //возвращает указатель на элемент списка первого уровня по номеру для вставки
 FirstList * divisionFirstList(FirstList * head);//делит на два и возвращает указатель на второй
 void refreshIndex(FirstList * head);//обновляет индексы
+void saveToFile(FirstList * head); // записывает текущее состояние в файл
+void printTheFile();
+void loadFromFile(FirstList * head);//загружает предыдущее состояние из файла
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +72,7 @@ void main()
 	printf("Now we begin to first fill the list of list. Input elem or input \"exit\" for break input\n");
 
 	secondFillFirstList(head);
-	
+	//loadFromFile(head);
 	showFirstList(head);
 	/*int tmp = 4;
 	showOneFirstList(findPtrFirstListForInput(head,tmp));
@@ -87,6 +90,8 @@ void main()
 		refreshIndex(head);
 		showFirstList(head);
 	}
+	saveToFile(head);
+	//printTheFile();
 	system("pause");
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -454,6 +459,133 @@ void refreshIndex(FirstList * head)
 		}
 	}
 }
+
+void saveToFile(FirstList * head)
+{
+	FILE * fd = fopen("111.txt", "w+");
+	fprintf(fd,"%d\n",head->max);
+	for (FirstList * currentFL = head; currentFL != NULL; currentFL = currentFL->next)
+	{
+		fprintf(fd,"%d\n",currentFL->contain);
+		for (SecondList * currentSL = currentFL->headOFSecondList; currentSL != NULL; currentSL = currentSL->next)
+		{
+			fprintf(fd,"%s\n",currentSL->content);
+		}
+		//fprintf(fd,"\n");
+	}
+	fclose(fd);
+}
+
+void printTheFile()
+{
+	FILE *fd = fopen("111.txt", "r+");
+	//int i = 0;
+	int max;
+	fscanf(fd, "%d", &max);
+	printf("Max:%d\n",max);
+	
+	while (true)
+	{
+		int contain = 0;
+		char tmp[255];
+		fscanf(fd, "%d",&contain);
+		if (contain == 0)
+			break;
+		printf("%d\n",contain);
+		getc(fd); // считываем лишний '\n' из файла после цифры
+		
+		for (int i = 0; i < contain; i++)
+		{
+			char buf[255] = { 0 };
+			char * returnableBuf;
+			
+			int j = 0;
+			while (true)
+			{
+				char ch = getc(fd);
+				if (ch == '\n')
+					break;
+				buf[j] = ch;
+				j++;
+			}
+			
+			int bufsize = (strlen(buf) + 1);
+			returnableBuf = (char*)malloc(sizeof(char)*bufsize);
+			strcpy(returnableBuf, buf);
+			printf("%s\n",returnableBuf);
+
+		}
+		printf("end of block\n");
+	}
+	printf("end read\n");
+	fclose(fd);
+}
+void loadFromFile(FirstList * head)
+{
+	FirstList * start;
+	start = head;
+	FILE *fd = fopen("111.txt", "r+");
+	int i = 0;
+	int max;
+	fscanf(fd, "%d", &max);
+	printf("Max:%d\n", max);
+
+	start->max = max;
+	int contain = 0;
+	fscanf(fd, "%d", &contain);
+	if (contain == 0)
+	{
+	}
+	else
+	{
+		while (true)
+		{
+			
+			//printf("%d\n", contain);
+			getc(fd); // считываем лишний '\n' из файла после цифры
+
+			for (int i = 0; i < contain; i++)
+			{
+				char buf[255] = { 0 };
+				char * returnableBuf;
+				SecondList *tmp;
+				tmp = creatElemSecondList();
+				int j = 0;
+				while (true)
+				{
+					char ch = getc(fd);
+					if (ch == '\n')
+						break;
+					buf[j] = ch;
+					j++;
+				}
+
+				int bufsize = (strlen(buf) + 1);
+				returnableBuf = (char*)malloc(sizeof(char)*bufsize);
+				strcpy(returnableBuf, buf);
+				//printf("%s\n", returnableBuf);
+				tmp->content = returnableBuf;
+				tmp->indx = i++;
+				addToTailOfLists(start,tmp);
+
+			}
+			fscanf(fd, "%d", &contain);
+			if (contain == 0)
+				break;
+			else
+			{
+				start->next = creatFirstList();
+				start->next->prev = start;
+				start->next->max = max;
+				start = start->next;
+			}
+
+		}
+	}
+	printf("end read\n");
+	fclose(fd);
+}
+
 
 
 
