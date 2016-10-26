@@ -17,6 +17,7 @@
 #include <conio.h>
 #include <Windows.h>
 #include <iostream>
+#include <time.h>
 
 struct SecondList
 {
@@ -39,41 +40,39 @@ FirstList * creatHeadFirstList(); /*	функция возвращает указатель на память выде
 										Ссылку на элемент второго уровня заNULLяем. Также ссылки на следущий и предыдущий элемент также 
 										приравниваем к NULL*/
 FirstList * creatFirstList();		/*	функция выделяет память под очередной элемент списка первого уровня и возвращает указатель на него*/
-void creatHeadSecondList(FirstList * elem);	/*	функция выделяет память под заголовк второго уровня и размещает его в первом*/
+FirstList * addToTailOfLists(FirstList * headFistList, SecondList * paste); /*добавляет элемент в конец списка списков
+																			возвращает указатель на новый хвост*/
+FirstList * findPtrFirstListForInput(FirstList * head, int &number); //возвращает указатель на элемент списка первого уровня по номеру для вставки
+FirstList * findPtrFirstListForDel(FirstList * head, int &number);	/*Возвращает указатель на элемент списка перовго уровня по номеру для удаления*/
+FirstList * divisionFirstList(FirstList * head);//делит на два и возвращает указатель на второй
+FirstList * creatSortOfFirstList(FirstList * head);	/*создет новый список списков и используя сортировку вставкой
+													(из первого списка во второй) сортирует данные первого списка*/
+FirstList * balance(FirstList*);	/*Балансировка*/
 SecondList * creatElemSecondList();				/*	функция выделяет память под элемент типа SecondList и заполняет его*/
-char * getInput();	// функция считывает со строки консоли строку и возвращает указатель на нее в качестве результата
+SecondList * creatElemSecListEmpty();
+SecondList * copySecondList(SecondList *Elem);// создает указатель на новый элемент скопированный из Elem
+SecondList * findString(FirstList *, char * string);	/*Поиск по списку списков*/
 void addToSecondList(SecondList * head, SecondList* paste);	// функция добавляет к (СУЩЕСТВУЮЩЕМУ ЭЛЕМЕНТУ) списку второго уровня элемент в конец списка.
 void fillSecondList(SecondList * headOfSecondList, bool &isBreak);	/*	функция получает на вход указатель на заголовок списка второго уровня и и ссылку на переменную-флаг указывающую на
 												то, что последнее введенное слово было "exit", а значит нужно прекратить ввод. Заполняет список. 
 												Подразумевается, что по указателю который передается уже была выделена память ранее.*/
-void firstFillFirstList(FirstList * headOfFirstList); // используя fillSecondList() функция заполняет работает на уровне первого списка.
-void secondFillFirstList(FirstList * headOfFirstList);
+void secondFillFirstList(FirstList * headOfFirstList);// используя fillSecondList() функция заполняет работает на уровне первого списка.
 void showFirstList(FirstList*head);	// выводит на экран список первого уровня используя в цикле функцию вывода списка второго уровня
 void showSecondList(SecondList*head);	/*	выводит на экран список второго уровня, в качестве аргумента принимает заголовок */
 void showOneFirstList(FirstList * head);
 bool isExit(const char *);	// проверяет передаваемую строку на совпадение со словом "exit"
-FirstList * addToTailOfLists(FirstList * headFistList, SecondList * paste); /*добавляет элемент в конец списка списков 
-																				возвращает указатель на новый хвост*/
 void inputByNumber(FirstList * head, SecondList * paste, int numb);
 int delByIndex(FirstList * &, int);
 int getcountsAllOfSecList(FirstList * head);	//считает общее количество элементов второго уровня
 int getCountAllOfFirstList(FirstList * head);	// считает количество элементов первого уровня
-FirstList * findPtrFirstListForInput(FirstList * head, int &number); //возвращает указатель на элемент списка первого уровня по номеру для вставки
-FirstList * findPtrFirstListForDel(FirstList * head, int &number);	/*Возвращает указатель на элемент списка перовго уровня по номеру для удаления*/
-FirstList * divisionFirstList(FirstList * head);//делит на два и возвращает указатель на второй
 void refreshIndex(FirstList * head);//обновляет индексы
 void saveToFile(FirstList * head); // записывает текущее состояние в файл
 void printTheFile();
 void loadFromFile(FirstList * head);//загружает предыдущее состояние из файла
-SecondList * copySecondList(SecondList *Elem);// создает указатель на новый элемент скопированный из Elem
 int findIndexOfInput(FirstList * head, SecondList *); //ищет индекс вставки по сортированному списку списков
 int compare(SecondList*, SecondList*); /*сравнивает содержание двух элементов второго уровня*/
-FirstList * creatSortOfFirstList(FirstList * head);	/*создет новый список списков и используя сортировку вставкой 
-													(из первого списка во второй) сортирует данные первого списка*/
 void clearSecondList(SecondList *);	/*Рекурсивно очищает память из под списка второго уровня*/
 void clearFirstList(FirstList*);	/*Очистка списка*/
-FirstList * balance(FirstList*);	/*Балансировка*/
-SecondList * findString(FirstList *, char * string);	/*Поиск по списку списков*/
 bool isEqual(SecondList * elem, char * c);	/*сравнивает содержимое текущего элемента и указатель на строку*/
 void testing();
 
@@ -99,7 +98,8 @@ const char * menu0[countMenuItem0] = { {"1.Input new List from keyboard"}, {"2.L
 void printMenu(const char **, int);
 int choiseFrom(int counOfChoise);
 int getNumber(int, int);
-//void display1();	
+char * getInput();	// функция считывает со строки консоли строку и возвращает указатель на нее в качестве результата
+	
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void main()
@@ -151,7 +151,11 @@ void main()
 			tmp = getInput();
 			tmpSecList = findString(head, tmp);
 			printf("Result is:\n");
-			showSecondList(tmpSecList);
+			//showSecondList(tmpSecList);
+			if (tmpSecList != NULL)
+				printf("indx = %d, string \"%s\"\n", tmpSecList->indx, tmpSecList->content);
+			else
+				printf("No one finding...\n");
 			system("pause");
 			free(tmp);
 			break;
@@ -159,7 +163,10 @@ void main()
 			saveToFile(head);
 			break;
 		case 5:		//5.Balancing
-			balance(head);
+			tmpFirstList = balance(head);
+			clearFirstList(head);
+			head = tmpFirstList;
+			isSort = 0;
 			break;
 		case 6:		//6.Insert by indx
 			
@@ -174,6 +181,7 @@ void main()
 			}
 			inputByNumber(head, tmpElem, numb);
 			refreshIndex(head);
+			isSort = 0;
 			break;
 		case 7:		//7.Insert to sort List
 			if (isSort == 1)
@@ -198,7 +206,7 @@ void main()
 			maxIndx = getcountsAllOfSecList(head);
 			indx = getNumber(0, maxIndx);
 			isSuccess = delByIndex(head, indx);
-			if (isSuccess == -1)
+			if (isSuccess == -1)	// для отладки
 			{
 				printf("BAD NEWS... Do not delete...\n");
 			}
@@ -213,7 +221,7 @@ void main()
 			isSort = 1;
 			break;
 		case 10:	//10.Testing
-			void testing();
+			testing();
 			break;
 		case 11:	//11.Save and exit
 			saveToFile(head);
@@ -224,8 +232,7 @@ void main()
 			break;
 		}
 	}
-	printf("Result is:\n");
-	
+		
 	system("pause");
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,8 +243,7 @@ FirstList * creatHeadFirstList()
 	head->headOFSecondList = NULL;
 	head->contain = 0;
 	head->max = 5;
-	//head->counts = 0;
-	
+		
 	return head;
 }
 FirstList * creatFirstList()
@@ -249,12 +255,190 @@ FirstList * creatFirstList()
 	tmp->max = 5;
 	return tmp;
 }
-void creatHeadSecondList(FirstList * elem)
+FirstList * addToTailOfLists(FirstList * TailFirstList, SecondList * paste)
 {
-	SecondList*tmp = (SecondList*)malloc(sizeof(SecondList));
-	elem->headOFSecondList = tmp; //выделили память по указанному адресу необходимого размера
-	tmp->content = NULL;
-	tmp->next = NULL;
+	FirstList * tail = TailFirstList;
+
+	if ((tail->contain + 1) > tail->max)
+	{
+		tail->next = creatFirstList();
+		tail->next->prev = tail;
+
+		//алгоритм добавления новогого элемента FirstList с разделением составляющих на два
+		int half = tail->contain / 2;
+
+		SecondList * tmph = tail->headOFSecondList;
+		for (int i = half - 1; i > 0; i--)
+			tmph = tmph->next;
+
+		tail->next->headOFSecondList = tmph->next;
+		tmph->next = NULL;	//
+
+		tail->next->contain = tail->contain / 2 + tail->contain % 2;
+		tail->contain = half;
+
+
+		tail = tail->next;
+
+	}
+	if (tail->contain == 0)
+	{
+		tail->headOFSecondList = paste;
+		tail->contain++;
+
+	}
+	else
+	{
+		SecondList * tmp;
+		for (tmp = tail->headOFSecondList; tmp->next != NULL; tmp = tmp->next);
+		tmp->next = paste;
+
+		tail->contain++;
+	}
+	return tail;
+}
+FirstList * findPtrFirstListForInput(FirstList * head, int &number)
+{
+	FirstList * tmp;
+	tmp = head;
+
+	for (; tmp->next != NULL; tmp = tmp->next)
+	{
+		if (number <= tmp->contain)
+			break;
+		number -= tmp->contain;
+	}
+	return tmp;
+}
+FirstList * findPtrFirstListForDel(FirstList * head, int &number)
+{
+	FirstList * tmp;							//заводим временный указатель и устанавливаем его на начало
+	tmp = head;									//
+	for (; tmp->next != NULL; tmp = tmp->next)	//пробегаем в цикле до искомого места
+	{
+		if (number < tmp->contain)
+			break;
+		number -= tmp->contain;					//каждый раз от индекса будем отнимать количество содержащихся 
+												//элементов в каждом из списков первого уровня
+												//т.о. получим указатель на необходимый элемент и индекс относительно этого списка
+	}
+	return tmp;
+}
+FirstList * divisionFirstList(FirstList * head)
+{
+	//создаем новый элемент типа FirstList
+	FirstList * tail;
+	tail = creatFirstList();
+	if (head->next != NULL)
+	{
+		tail->next = head->next;
+		tail->prev = head;
+		head->next->prev = tail;
+		head->next = tail;
+
+		//приводим в соответсвие связанные с ними данные
+
+		int half = head->contain / 2;
+		SecondList * tmp = head->headOFSecondList;
+		for (int i = half - 1; i > 0; i--)
+			tmp = tmp->next;
+
+		head->next->headOFSecondList = tmp->next;
+		tmp->next = NULL;
+
+		head->next->contain = head->contain / 2 + head->contain % 2;
+		head->contain = half;
+	}
+	else
+	{
+		tail->prev = head;
+		head->next = tail;
+
+		//Заводим указатель, и ставим его на середину существующего списка
+		int half = head->contain / 2;
+		SecondList * tmp = head->headOFSecondList;
+		for (int i = half - 1; i > 0; i--)
+			tmp = tmp->next;
+
+		tail->headOFSecondList = tmp->next;
+		tmp->next = NULL;
+		tail->contain = half + head->contain % 2;
+		head->contain = half;
+
+	}
+
+	return tail;
+}
+FirstList * creatSortOfFirstList(FirstList * head)
+{
+	FirstList * headNew;
+	headNew = creatHeadFirstList();
+	//int countNew;
+	for (FirstList * currentFirstList = head; currentFirstList != NULL; currentFirstList = currentFirstList->next)
+	{
+		for (SecondList * currentSecList = currentFirstList->headOFSecondList; currentSecList != NULL; currentSecList = currentSecList->next)
+		{
+			int numb = findIndexOfInput(headNew, currentSecList);
+			printf("Input\"%s\" by indx = %d\n", currentSecList->content, numb);
+			SecondList * tmp = copySecondList(currentSecList);
+
+			inputByNumber(headNew, tmp, numb);
+			printf("read \"%s\" complite!\n", tmp->content);
+
+		}
+	}
+	refreshIndex(headNew);
+	return headNew;
+}
+FirstList * balance(FirstList*head)
+{
+	FirstList * headPtr, *newHead, *newHeadPtr;
+	headPtr = head;
+	newHead = creatHeadFirstList();
+	newHeadPtr = newHead;
+	int a = getcountsAllOfSecList(headPtr);
+	int b = getCountAllOfFirstList(headPtr);
+	int average = a / b;
+	int residue = a % b;
+	int x = 0;//счетчик количества вставок
+	for (headPtr; headPtr != NULL; headPtr = headPtr->next)
+	{
+		for (SecondList * current = headPtr->headOFSecondList; current != NULL; current = current->next)
+		{
+			addToTailOfLists(newHeadPtr, copySecondList(current));
+			x++;	//увеличиваем счетчик количества вставок
+
+			if (residue > 0)
+			{
+				if (x == average + 1)	//заполнили необходимое количество
+				{
+					newHeadPtr->next = creatFirstList();	//создаем новый элемент первого уровня
+
+					newHeadPtr->next->prev = newHeadPtr;	//приводим его в соответствие
+
+					newHeadPtr = newHeadPtr->next;//перемещаем указатель на него
+
+					x = 0;//обнуляем счетчик количества вставок
+
+					residue--;//уменьшаем residue на 1
+				}
+			}
+			else
+			{
+				if (x == average)	//заполнили необходимое количество
+				{
+					newHeadPtr->next = creatFirstList();	//создаем новый элемент первого уровня
+
+					newHeadPtr->next->prev = newHeadPtr;	//приводим его в соответствие
+
+					newHeadPtr = newHeadPtr->next;	//перемщаем указатель на него
+
+					x = 0;	//обнуляем счетчик количества вставок
+				}
+			}
+		}
+	}
+	return newHead;
 }
 SecondList * creatElemSecondList()
 {
@@ -267,6 +451,15 @@ SecondList * creatElemSecondList()
 	tmp->next=NULL;
 	return tmp;
 }
+SecondList * creatElemSecListEmpty()
+{
+	char c[] = { "<empty element>" };
+	SecondList *tmp = (SecondList*)malloc(sizeof(SecondList));
+	tmp->content = (char*)malloc(sizeof(char)*(strlen(c) + 1));
+	strcpy(tmp->content,c);
+	tmp->next = NULL;
+	return tmp;
+}
 SecondList * creatCleanElemSecList() 
 {
 	SecondList *tmp = (SecondList*)malloc(sizeof(SecondList));
@@ -275,19 +468,38 @@ SecondList * creatCleanElemSecList()
 	tmp->indx = NULL;
 	return tmp;
 }
-char * getInput()
+SecondList * copySecondList(SecondList *Elem)
 {
-	char buf[255] = { 0 };
-	char * returnableBuf;
-	std::cin.ignore(std::cin.rdbuf()->in_avail());
-	scanf("%[^\n]s", buf);
-	std::cin.ignore(std::cin.rdbuf()->in_avail());
-	int bufsize = (strlen(buf) + 1);
-	returnableBuf = (char*)malloc(sizeof(char)*bufsize);
-	strcpy(returnableBuf, buf);
-	
-	return returnableBuf;
+	SecondList * tmp;
+	tmp = (SecondList*)malloc(sizeof(SecondList));
+	int bufsize = (strlen(Elem->content) + 1);
+	tmp->content = (char *)malloc(sizeof(char)*bufsize);
+	strcpy(tmp->content, Elem->content);
+	//tmp->content = Elem->content;
+	tmp->indx = Elem->indx;
+	tmp->next = NULL;
+	return tmp;
 }
+SecondList * findString(FirstList *head, char * string)
+{
+	SecondList *tmp = NULL;
+	printf("Searching...\nRESULT:\n");
+	for (FirstList * currentFirstList = head; currentFirstList != NULL; currentFirstList = currentFirstList->next)
+	{
+		for (SecondList * currentSecList = currentFirstList->headOFSecondList; currentSecList != NULL; currentSecList = currentSecList->next)
+		{
+			if (isEqual(currentSecList, string))
+			{
+				tmp = currentSecList;
+				//showSecondList(currentSecList);
+				//
+			}
+		}
+	}
+
+	return tmp;
+}
+
 void addToSecondList(SecondList * head, SecondList* paste)
 {
 	SecondList * current;															//создаем указатель на заголовок
@@ -325,35 +537,6 @@ void fillSecondList(SecondList * headOfSecondList, bool &isBreak)
 	}
 
 }
-void firstFillFirstList(FirstList * headOfFirstList)
-{
-	int i = 0; //создаем переменную хранящую глобальный порядоковый номер конечного элемента (строки)
-	//headOfFirstList = creatHeadFirstList();
-	FirstList * start = headOfFirstList;
-	creatHeadSecondList(headOfFirstList);
-	printf("Now we begin to first fill the list of list\n");
-	while (true)	//создаем цикл условием выхода в котором будет желание пользователя прекратить ввод элементов
-	{
-		bool isBreak = false;
-		fillSecondList(start->headOFSecondList, isBreak);
-		if (isBreak)
-		{
-			break;
-		}
-		int isExit0 = 0;
-		printf("Do you want stop the input? Or continue and creat new element of FirstList? Continue(1)/stop(0)\n>>>");
-		scanf("%d", &isExit0);
-
-		if (isExit0 == 0)
-		{
-			break;
-		}
-		start->next = creatFirstList();	//	создаем новый элемент списка первого уровня
-		start->next->prev = start;	//	приводим в соответствие указатели на предыдущий элемент у вновь созданного
-		creatHeadSecondList(start->next);	//	выделяем память по адресу списка второго уровня (под заголовок)
-		start = start->next;		//	перемещаем указатель на следующий элемент первого уровня
-	}
-}
 void secondFillFirstList(FirstList * headOfFirstList)
 {
 	int i = 0;
@@ -389,11 +572,10 @@ void showFirstList(FirstList*head)
 }
 void showSecondList(SecondList*head)
 {
-	
 	for (SecondList * current = head; current != NULL; current = current->next)
 	{
-		printf("%dst element of Secondary List (SecondList) is: %s\n",current->indx, current->content);
-		//printf("[%d]-[%s] ", current->indx, current->content);
+		//printf("%dst element of Secondary List (SecondList) is: %s\n",current->indx, current->content);
+		printf(" [%s] ->", current->content);
 	}
 }
 void showOneFirstList(FirstList * head)
@@ -417,48 +599,6 @@ bool isExit(const char * s)
 		return true;
 	else
 		return false;
-}
-FirstList * addToTailOfLists(FirstList * TailFirstList, SecondList * paste)
-{
-	FirstList * tail = TailFirstList;
-	
-	if ((tail->contain + 1) > tail->max)
-	{
-		tail->next = creatFirstList();
-		tail->next->prev = tail;
-		
-		//алгоритм добавления новогого элемента FirstList с разделением составляющих на два
-		int half = tail->contain / 2;
-		
-		SecondList * tmph=tail->headOFSecondList;
-		for (int i = half-1; i > 0; i--)
-			tmph = tmph->next;
-		
-		tail->next->headOFSecondList = tmph->next;
-		tmph->next = NULL;	//
-
-		tail->next->contain = tail->contain / 2 + tail->contain % 2;
-		tail->contain = half;
-		
-
-		tail = tail->next;
-		
-	}
-	if (tail->contain==0)
-	{
-		tail->headOFSecondList = paste;
-		tail->contain++;
-
-	}
-	else
-	{
-		SecondList * tmp;
-		for (tmp = tail->headOFSecondList; tmp->next != NULL;tmp=tmp->next);
-		tmp->next = paste;
-
-		tail->contain++;
-	}
-	return tail;
 }
 void inputByNumber(FirstList * head, SecondList * paste, int numb)
 {
@@ -573,11 +713,20 @@ int delByIndex(FirstList *&head, int indx)
 		{
 			//плачевная ситуация когда необходимо удалить элемент первого уровня и он является загловком
 			//необходимо убрать связь у следующего элемента с текущим
-			FLptr->next->prev = NULL;
-			// переводим ссылку на новое начало списка
-			head = FLptr->next;
-			// удаляем связь текущего элемента с новым заголовком
-			FLptr->next = NULL;
+			if (FLptr->next != NULL)
+			{
+				FLptr->next->prev = NULL;
+				// переводим ссылку на новое начало списка
+				head = FLptr->next;
+				// удаляем связь текущего элемента с новым заголовком
+				FLptr->next = NULL;
+			}
+			else
+			{
+				free(FLptr);
+				//clearFirstList(FLptr);
+				return 0;
+			}
 			// очищаем список состоящий теперь из одного элемента
 			/*free(FLptr->headOFSecondList->content);
 			free(FLptr->headOFSecondList);
@@ -654,78 +803,6 @@ int getCountAllOfFirstList(FirstList * head)
 		i++;
 	}
 	return i;
-}
-FirstList * findPtrFirstListForInput(FirstList * head, int &number)
-{
-	FirstList * tmp;
-	tmp = head;
-	
-	for (; tmp->next != NULL; tmp = tmp->next)
-	{
-		if (number <= tmp->contain)
-			break;
-		number -= tmp->contain;
-	}
-	return tmp;
-}
-FirstList * findPtrFirstListForDel(FirstList * head, int &number)
-{
-	FirstList * tmp;							//заводим временный указатель и устанавливаем его на начало
-	tmp = head;									//
-	for (; tmp->next != NULL; tmp = tmp->next)	//пробегаем в цикле до искомого места
-	{
-		if (number < tmp->contain)
-			break;
-		number -= tmp->contain;					//каждый раз от индекса будем отнимать количество содержащихся 
-												//элементов в каждом из списков первого уровня
-												//т.о. получим указатель на необходимый элемент и индекс относительно этого списка
-	}
-	return tmp;
-}
-FirstList * divisionFirstList(FirstList * head)
-{
-	//создаем новый элемент типа FirstList
-	FirstList * tail;
-	tail = creatFirstList();
-	if (head->next != NULL)
-	{
-		tail->next = head->next;
-		tail->prev = head;
-		head->next->prev = tail;
-		head->next = tail;
-
-		//приводим в соответсвие связанные с ними данные
-
-		int half = head->contain / 2;
-		SecondList * tmp = head->headOFSecondList;
-		for (int i = half - 1; i > 0; i--)
-			tmp = tmp->next;
-
-		head->next->headOFSecondList = tmp->next;
-		tmp->next = NULL;
-
-		head->next->contain = head->contain / 2 + head->contain % 2;
-		head->contain = half;
-	}
-	else
-	{
-		tail->prev = head;
-		head->next = tail;
-
-		//Заводим указатель, и ставим его на середину существующего списка
-		int half = head->contain / 2;
-		SecondList * tmp = head->headOFSecondList;
-		for (int i = half - 1; i > 0; i--)
-			tmp = tmp->next;
-
-		tail->headOFSecondList = tmp->next;
-		tmp->next = NULL;
-		tail->contain = half+ head->contain%2;
-		head->contain = half;
-
-	}
-
-	return tail;
 }
 void refreshIndex(FirstList * head)
 {
@@ -865,18 +942,6 @@ void loadFromFile(FirstList * head)
 	printf("end read\n");
 	fclose(fd);
 }
-SecondList * copySecondList(SecondList *Elem)
-{
-	SecondList * tmp;
-	tmp = (SecondList*)malloc(sizeof(SecondList));
-	int bufsize = (strlen(Elem->content) + 1);
-	tmp->content = (char *)malloc(sizeof(char)*bufsize);
-	strcpy(tmp->content, Elem->content);
-	//tmp->content = Elem->content;
-	tmp->indx = Elem->indx;
-	tmp->next = NULL;
-	return tmp;
-}
 int findIndexOfInput(FirstList * head, SecondList * paste)
 {
 	int i = 0;
@@ -926,27 +991,6 @@ int compare(SecondList * first, SecondList * second)
 	else
 		return 0;
 }
-FirstList * creatSortOfFirstList(FirstList * head)
-{
-	FirstList * headNew;
-	headNew = creatHeadFirstList();
-	//int countNew;
-	for (FirstList * currentFirstList = head; currentFirstList != NULL; currentFirstList = currentFirstList->next)
-	{
-		for (SecondList * currentSecList = currentFirstList->headOFSecondList; currentSecList != NULL; currentSecList = currentSecList->next)
-		{
-			int numb = findIndexOfInput(headNew, currentSecList);
-			printf("Input\"%s\" by indx = %d\n",currentSecList->content, numb);
-			SecondList * tmp = copySecondList(currentSecList);
-
-			inputByNumber(headNew, tmp, numb);
-			printf("read \"%s\" complite!\n",tmp->content);
-			
-		}
-	}
-	refreshIndex(headNew);
-	return headNew;
-}
 void clearSecondList(SecondList * Elem)
 {
 	if (Elem->next != NULL)
@@ -971,74 +1015,6 @@ void clearFirstList(FirstList*head)
 	}
 	free(current);
 }
-FirstList * balance(FirstList*head)
-{
-	FirstList * headPtr, * newHead, * newHeadPtr;
-	headPtr = head;
-	newHead = creatHeadFirstList();
-	newHeadPtr = newHead;
-	int a = getcountsAllOfSecList(headPtr);
-	int b = getCountAllOfFirstList(headPtr);
-	int average = a / b;
-	int residue = a % b;
-	int x = 0;//счетчик количества вставок
-	for (headPtr;headPtr!=NULL;headPtr=headPtr->next)
-	{
-		for (SecondList * current = headPtr->headOFSecondList; current != NULL; current = current->next)
-		{
-				addToTailOfLists(newHeadPtr,copySecondList(current));
-				x++;	//увеличиваем счетчик количества вставок
-			
-			if (residue > 0)
-			{
-				if (x == average + 1)	//заполнили необходимое количество
-				{
-					newHeadPtr->next = creatFirstList();	//создаем новый элемент первого уровня
-					
-					newHeadPtr->next->prev = newHeadPtr;	//приводим его в соответствие
-
-					newHeadPtr = newHeadPtr->next;//перемещаем указатель на него
-
-					x = 0;//обнуляем счетчик количества вставок
-
-					residue--;//уменьшаем residue на 1
-				}
-			}
-			else
-			{
-				if (x == average)	//заполнили необходимое количество
-				{
-					newHeadPtr->next = creatFirstList();	//создаем новый элемент первого уровня
-
-					newHeadPtr->next->prev = newHeadPtr;	//приводим его в соответствие
-
-					newHeadPtr = newHeadPtr->next;	//перемщаем указатель на него
-
-					x = 0;	//обнуляем счетчик количества вставок
-				}
-			}
-		}
-	}
-	return newHead;
-}
-SecondList * findString(FirstList *head, char * string)
-{
-	SecondList *tmp = NULL;
-	printf("Searching...\nRESULT:\n");
-	for (FirstList * currentFirstList = head; currentFirstList != NULL; currentFirstList = currentFirstList->next)
-	{
-		for (SecondList * currentSecList = currentFirstList->headOFSecondList; currentSecList != NULL; currentSecList = currentSecList->next)
-		{
-			if (isEqual(currentSecList, string))
-			{
-				tmp = currentSecList;
-				showSecondList(currentSecList);
-			}
-		}
-	}
-	
-	return tmp;
-}
 bool isEqual(SecondList * elem, char * c)
 {
 	int lenC = strlen(c);
@@ -1058,11 +1034,39 @@ bool isEqual(SecondList * elem, char * c)
 void testing()
 {
 	system("cls");
-	printf("Please, input count of Element (from 100 to 10 000)?\n");
-	int n = getNumber(100, 10000);
-
+	printf("Please, input count of Element (from 100 to 100 000)?\n");
+	int n = getNumber(100, 100000);
+	FirstList * head, *tmpHead;
+	
+	head = creatHeadFirstList();
+	tmpHead = head;
+	
+	unsigned int start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		SecondList * tmp = creatElemSecListEmpty();
+		tmpHead = addToTailOfLists(tmpHead, tmp);
+	}
+	
+	unsigned int end_time = clock();
+	unsigned int result = end_time - start_time;
+	printf("Time to creat and input %d elements = %ld\n",n,result);
+	
+	system("pause");
+	
+	int a, b;
+	start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		b = getcountsAllOfSecList(head);
+		a = rand() % b;
+		delByIndex(head, a);
+	}
+	end_time = clock();
+	result = end_time - start_time;
+	printf("Time to %d delete random element = %ld\n", n-1, result);
+	system("pause");
 }
-
 
 //////////////////СЛУЖЕБНЫЕ ФУНКЦИИ///////////////////////////////
 void printMenu(const char ** menu, int counOfMenuItem)
@@ -1071,7 +1075,6 @@ void printMenu(const char ** menu, int counOfMenuItem)
 	for (int i = 0; i < counOfMenuItem; i++)
 		printf("%s\n",menu[i]);
 }
-
 int choiseFrom(int counOfChoise)
 {
 	int ch;
@@ -1133,6 +1136,19 @@ int getNumber(int from, int to)
 		else
 			return ch;
 	}
+}
+char * getInput()
+{
+	char buf[255] = { 0 };
+	char * returnableBuf;
+	std::cin.ignore(std::cin.rdbuf()->in_avail());
+	scanf("%[^\n]s", buf);
+	std::cin.ignore(std::cin.rdbuf()->in_avail());
+	int bufsize = (strlen(buf) + 1);
+	returnableBuf = (char*)malloc(sizeof(char)*bufsize);
+	strcpy(returnableBuf, buf);
+
+	return returnableBuf;
 }
 
 
