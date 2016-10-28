@@ -1,6 +1,6 @@
 ﻿  Source.cpp
-c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(741): warning C4101: tmp2: неиспользованная локальная переменная
-c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(741): warning C4101: tmp1: неиспользованная локальная переменная
-c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(786): warning C4715: delByIndex: значение возвращается не при всех путях выполнения
+c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(747): warning C4101: tmp2: неиспользованная локальная переменная
+c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(747): warning C4101: tmp1: неиспользованная локальная переменная
+c:\users\артем pc\source\repos\stage2_lab5_v.0.2\consoleapplication1\source.cpp(792): warning C4715: delByIndex: значение возвращается не при всех путях выполнения
   ConsoleApplication1.vcxproj -> C:\Users\Артем PC\Source\Repos\Stage2_lab5_v.0.2\ConsoleApplication1\Debug\ConsoleApplication1.exe
   ConsoleApplication1.vcxproj -> C:\Users\Артем PC\Source\Repos\Stage2_lab5_v.0.2\ConsoleApplication1\Debug\ConsoleApplication1.pdb (Full PDB)

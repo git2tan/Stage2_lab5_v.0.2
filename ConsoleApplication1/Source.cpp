@@ -49,7 +49,7 @@ FirstList * creatSortOfFirstList(FirstList * head);	/*создет новый список списко
 													(из первого списка во второй) сортирует данные первого списка*/
 FirstList * balance(FirstList*);	/*Балансировка*/
 SecondList * creatElemSecondList();				/*	функция выделяет память под элемент типа SecondList и заполняет его*/
-SecondList * creatElemSecListEmpty();
+SecondList * creatElemSecListEmpty();	/*создает элемент и выделяет под него память с инициализаторами по умолчанию (пустой)*/
 SecondList * copySecondList(SecondList *Elem);// создает указатель на новый элемент скопированный из Elem
 SecondList * findString(FirstList *, char * string);	/*Поиск по списку списков*/
 void addToSecondList(SecondList * head, SecondList* paste);	// функция добавляет к (СУЩЕСТВУЮЩЕМУ ЭЛЕМЕНТУ) списку второго уровня элемент в конец списка.
@@ -62,22 +62,19 @@ void showSecondList(SecondList*head);	/*	выводит на экран список второго уровня,
 void showOneFirstList(FirstList * head);
 bool isExit(const char *);	// проверяет передаваемую строку на совпадение со словом "exit"
 void inputByNumber(FirstList * head, SecondList * paste, int numb);
-int delByIndex(FirstList * &, int);
+int delByIndex(FirstList * &, int);		//удаляет из списка списков элемент по индексу
 int getcountsAllOfSecList(FirstList * head);	//считает общее количество элементов второго уровня
 int getCountAllOfFirstList(FirstList * head);	// считает количество элементов первого уровня
 void refreshIndex(FirstList * head);//обновляет индексы
 void saveToFile(FirstList * head); // записывает текущее состояние в файл
-void printTheFile();
 void loadFromFile(FirstList * head);//загружает предыдущее состояние из файла
 int findIndexOfInput(FirstList * head, SecondList *); //ищет индекс вставки по сортированному списку списков
 int compare(SecondList*, SecondList*); /*сравнивает содержание двух элементов второго уровня*/
 void clearSecondList(SecondList *);	/*Рекурсивно очищает память из под списка второго уровня*/
 void clearFirstList(FirstList*);	/*Очистка списка*/
 bool isEqual(SecondList * elem, char * c);	/*сравнивает содержимое текущего элемента и указатель на строку*/
-void testing();
 
-
-/*служебные функции и переменные для реализации меню*/
+//////////////////ПРОТОТИПЫ СЛУЖЕБНЫХ ФУНКЦИЙ///////////////////////////////
 const int countMenuItem1 = 12;
 const char * menu1[countMenuItem1] = {	
 							//{"0.Show List of List"},
@@ -99,9 +96,10 @@ void printMenu(const char **, int);
 int choiseFrom(int counOfChoise);
 int getNumber(int, int);
 char * getInput();	// функция считывает со строки консоли строку и возвращает указатель на нее в качестве результата
+void printTheFile();
+void testing();
 	
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 void main()
 {
 	printMenu(menu0, countMenuItem0);
@@ -235,7 +233,7 @@ void main()
 		
 	system("pause");
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 FirstList * creatHeadFirstList()
 {
 	FirstList * head = (FirstList*)malloc(sizeof(FirstList));
@@ -400,13 +398,15 @@ FirstList * balance(FirstList*head)
 	int b = getCountAllOfFirstList(headPtr);
 	int average = a / b;
 	int residue = a % b;
-	int x = 0;//счетчик количества вставок
+	int x = 0;//счетчик количества текущих вставок (для того чтобы знать кодга переходить к сл.элементу первого уровня)
+	int y = 0;//счетчик количества всех вставок (для отлова конца)
 	for (headPtr; headPtr != NULL; headPtr = headPtr->next)
 	{
 		for (SecondList * current = headPtr->headOFSecondList; current != NULL; current = current->next)
 		{
 			addToTailOfLists(newHeadPtr, copySecondList(current));
-			x++;	//увеличиваем счетчик количества вставок
+			x++;	//увеличиваем счетчик количества текущих вставок
+			y++;	//увеличиваем счетчик количества всех вставок
 
 			if (residue > 0)
 			{
@@ -425,6 +425,10 @@ FirstList * balance(FirstList*head)
 			}
 			else
 			{
+				if (y == a)
+				{
+					break;
+				}
 				if (x == average)	//заполнили необходимое количество
 				{
 					newHeadPtr->next = creatFirstList();	//создаем новый элемент первого уровня
@@ -831,50 +835,6 @@ void saveToFile(FirstList * head)
 	}
 	fclose(fd);
 }
-void printTheFile()
-{
-	FILE *fd = fopen("111.txt", "r+");
-	//int i = 0;
-	int max;
-	fscanf(fd, "%d", &max);
-	printf("Max:%d\n",max);
-	
-	while (true)
-	{
-		int contain = 0;
-		//char tmp[255];
-		fscanf(fd, "%d",&contain);
-		if (contain == 0)
-			break;
-		printf("%d\n",contain);
-		getc(fd); // считываем лишний '\n' из файла после цифры
-		
-		for (int i = 0; i < contain; i++)
-		{
-			char buf[255] = { 0 };
-			char * returnableBuf;
-			
-			int j = 0;
-			while (true)
-			{
-				char ch = getc(fd);
-				if (ch == '\n')
-					break;
-				buf[j] = ch;
-				j++;
-			}
-			
-			int bufsize = (strlen(buf) + 1);
-			returnableBuf = (char*)malloc(sizeof(char)*bufsize);
-			strcpy(returnableBuf, buf);
-			printf("%s\n",returnableBuf);
-
-		}
-		printf("end of block\n");
-	}
-	printf("end read\n");
-	fclose(fd);
-}
 void loadFromFile(FirstList * head)
 {
 	FirstList * start;
@@ -1031,42 +991,6 @@ bool isEqual(SecondList * elem, char * c)
 	return false;
 
 }
-void testing()
-{
-	system("cls");
-	printf("Please, input count of Element (from 100 to 100 000)?\n");
-	int n = getNumber(100, 100000);
-	FirstList * head, *tmpHead;
-	
-	head = creatHeadFirstList();
-	tmpHead = head;
-	
-	unsigned int start_time = clock();
-	for (int i = 0; i < n; i++)
-	{
-		SecondList * tmp = creatElemSecListEmpty();
-		tmpHead = addToTailOfLists(tmpHead, tmp);
-	}
-	
-	unsigned int end_time = clock();
-	unsigned int result = end_time - start_time;
-	printf("Time to creat and input %d elements = %ld\n",n,result);
-	
-	system("pause");
-	
-	int a, b;
-	start_time = clock();
-	for (int i = 0; i < n; i++)
-	{
-		b = getcountsAllOfSecList(head);
-		a = rand() % b;
-		delByIndex(head, a);
-	}
-	end_time = clock();
-	result = end_time - start_time;
-	printf("Time to %d delete random element = %ld\n", n-1, result);
-	system("pause");
-}
 
 //////////////////СЛУЖЕБНЫЕ ФУНКЦИИ///////////////////////////////
 void printMenu(const char ** menu, int counOfMenuItem)
@@ -1149,6 +1073,86 @@ char * getInput()
 	strcpy(returnableBuf, buf);
 
 	return returnableBuf;
+}
+void printTheFile()
+{
+	FILE *fd = fopen("111.txt", "r+");
+	//int i = 0;
+	int max;
+	fscanf(fd, "%d", &max);
+	printf("Max:%d\n", max);
+
+	while (true)
+	{
+		int contain = 0;
+		//char tmp[255];
+		fscanf(fd, "%d", &contain);
+		if (contain == 0)
+			break;
+		printf("%d\n", contain);
+		getc(fd); // считываем лишний '\n' из файла после цифры
+
+		for (int i = 0; i < contain; i++)
+		{
+			char buf[255] = { 0 };
+			char * returnableBuf;
+
+			int j = 0;
+			while (true)
+			{
+				char ch = getc(fd);
+				if (ch == '\n')
+					break;
+				buf[j] = ch;
+				j++;
+			}
+
+			int bufsize = (strlen(buf) + 1);
+			returnableBuf = (char*)malloc(sizeof(char)*bufsize);
+			strcpy(returnableBuf, buf);
+			printf("%s\n", returnableBuf);
+
+		}
+		printf("end of block\n");
+	}
+	printf("end read\n");
+	fclose(fd);
+}
+void testing()
+{
+	system("cls");
+	printf("Please, input count of Element (from 100 to 100 000)?\n");
+	int n = getNumber(100, 100000);
+	FirstList * head, *tmpHead;
+
+	head = creatHeadFirstList();
+	tmpHead = head;
+
+	unsigned int start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		SecondList * tmp = creatElemSecListEmpty();
+		tmpHead = addToTailOfLists(tmpHead, tmp);
+	}
+
+	unsigned int end_time = clock();
+	unsigned int result = end_time - start_time;
+	printf("Time to creat and input %d elements = %ld\n", n, result);
+
+	system("pause");
+
+	int a, b;
+	start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		b = getcountsAllOfSecList(head);
+		a = rand() % b;
+		delByIndex(head, a);
+	}
+	end_time = clock();
+	result = end_time - start_time;
+	printf("Time to %d delete random element = %ld\n", n, result);
+	system("pause");
 }
 
 
