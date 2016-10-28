@@ -1,239 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
-/*На логическим уровне разрабатываемая структура данных представляет собой обычную линейную последовательность 
-элементов (например, строк) со стандартным набором операций (добавление в конец, вставка и удаление по логическому номеру, 
-сортировка, бинарный поиск, вставка с сохранением порядка, сохранение и загрузка из текстового файла, выравнивание 
-(балансировка - выравнивание размерностей структур данных нижнего уровня). Физическая структура данных имеет два уровня. 
+#include "Header.h"	
 
-На нижнем уровне поддерживается ограничение размерности структуры данных: при переполнении она разбивается пополам, 
-соответствующие изменения вносятся в верхний уровень. При выполнении работы произвести измерение зависимости «грязного» 
-времени работы программы и ее трудоемкости (количества базовых операций). Оценить вид полученной 
-зависимости (линейно-логарифмическая, квадратичная).
-
-Список - каждый элемент является заголовком односвязного списка. Элемент списка второго уровня содержит
-указатель на строку. (Включение элемента последним в список производить с учетом 
-выравнивания длины текущего и следующего списков).*/
-
-#include <stdio.h>
-#include <conio.h>
-#include <Windows.h>
-#include <iostream>
-#include <time.h>
-
-struct SecondList
-{
-	SecondList * next;
-	char * content;
-	int indx;
-};
-struct FirstList
-{
-	FirstList * next;
-	FirstList * prev;
-	SecondList * headOFSecondList;
-	//static int counts;
-	int contain;
-	int max;
-};
-
-FirstList * creatHeadFirstList(); /*	функция возвращает указатель на память выделенную под созданный первый элемент списка первого уровня
-										в этой функции мы выделяем память только под элемент первого уровня. 
-										Ссылку на элемент второго уровня заNULLяем. Также ссылки на следущий и предыдущий элемент также 
-										приравниваем к NULL*/
-FirstList * creatFirstList();		/*	функция выделяет память под очередной элемент списка первого уровня и возвращает указатель на него*/
-FirstList * addToTailOfLists(FirstList * headFistList, SecondList * paste); /*добавляет элемент в конец списка списков
-																			возвращает указатель на новый хвост*/
-FirstList * findPtrFirstListForInput(FirstList * head, int &number); //возвращает указатель на элемент списка первого уровня по номеру для вставки
-FirstList * findPtrFirstListForDel(FirstList * head, int &number);	/*Возвращает указатель на элемент списка перовго уровня по номеру для удаления*/
-FirstList * divisionFirstList(FirstList * head);//делит на два и возвращает указатель на второй
-FirstList * creatSortOfFirstList(FirstList * head);	/*создет новый список списков и используя сортировку вставкой
-													(из первого списка во второй) сортирует данные первого списка*/
-FirstList * balance(FirstList*);	/*Балансировка*/
-SecondList * creatElemSecondList();				/*	функция выделяет память под элемент типа SecondList и заполняет его*/
-SecondList * creatElemSecListEmpty();	/*создает элемент и выделяет под него память с инициализаторами по умолчанию (пустой)*/
-SecondList * copySecondList(SecondList *Elem);// создает указатель на новый элемент скопированный из Elem
-SecondList * findString(FirstList *, char * string);	/*Поиск по списку списков*/
-void addToSecondList(SecondList * head, SecondList* paste);	// функция добавляет к (СУЩЕСТВУЮЩЕМУ ЭЛЕМЕНТУ) списку второго уровня элемент в конец списка.
-void fillSecondList(SecondList * headOfSecondList, bool &isBreak);	/*	функция получает на вход указатель на заголовок списка второго уровня и и ссылку на переменную-флаг указывающую на
-												то, что последнее введенное слово было "exit", а значит нужно прекратить ввод. Заполняет список. 
-												Подразумевается, что по указателю который передается уже была выделена память ранее.*/
-void secondFillFirstList(FirstList * headOfFirstList);// используя fillSecondList() функция заполняет работает на уровне первого списка.
-void showFirstList(FirstList*head);	// выводит на экран список первого уровня используя в цикле функцию вывода списка второго уровня
-void showSecondList(SecondList*head);	/*	выводит на экран список второго уровня, в качестве аргумента принимает заголовок */
-void showOneFirstList(FirstList * head);
-bool isExit(const char *);	// проверяет передаваемую строку на совпадение со словом "exit"
-void inputByNumber(FirstList * head, SecondList * paste, int numb);
-int delByIndex(FirstList * &, int);		//удаляет из списка списков элемент по индексу
-int getcountsAllOfSecList(FirstList * head);	//считает общее количество элементов второго уровня
-int getCountAllOfFirstList(FirstList * head);	// считает количество элементов первого уровня
-void refreshIndex(FirstList * head);//обновляет индексы
-void saveToFile(FirstList * head); // записывает текущее состояние в файл
-void loadFromFile(FirstList * head);//загружает предыдущее состояние из файла
-int findIndexOfInput(FirstList * head, SecondList *); //ищет индекс вставки по сортированному списку списков
-int compare(SecondList*, SecondList*); /*сравнивает содержание двух элементов второго уровня*/
-void clearSecondList(SecondList *);	/*Рекурсивно очищает память из под списка второго уровня*/
-void clearFirstList(FirstList*);	/*Очистка списка*/
-bool isEqual(SecondList * elem, char * c);	/*сравнивает содержимое текущего элемента и указатель на строку*/
-
-//////////////////ПРОТОТИПЫ СЛУЖЕБНЫХ ФУНКЦИЙ///////////////////////////////
-const int countMenuItem1 = 12;
-const char * menu1[countMenuItem1] = {	
-							//{"0.Show List of List"},
-							{"1.Clear and Input new List from keyboard"},
-							{"2.Clear and Load List from file"},
-							{"3.Search string in the List"},
-							{"4.Save DataBase to file"},
-							{"5.Balancing"},					//
-							{"6.Insert by indx"},				//
-							{"7.Insert to sort List"},			//не реализовано
-							{"8.Delete by indx"},				//не реализовано
-							{"9.Sort"},
-							{"10.Testing..."},					//не реализовано
-							{"11.Save and exit"},
-							{"12.Exit without saving"} };
-const int countMenuItem0 = 3;
-const char * menu0[countMenuItem0] = { {"1.Input new List from keyboard"}, {"2.Load from file"}, {"3.Exit"} };
-void printMenu(const char **, int);
-int choiseFrom(int counOfChoise);
-int getNumber(int, int);
-char * getInput();	// функция считывает со строки консоли строку и возвращает указатель на нее в качестве результата
-void printTheFile();
-void testing();
-	
-/////////////////////////////////////////////////////////////////////////////
-void main()
-{
-	printMenu(menu0, countMenuItem0);
-	FirstList * head = creatHeadFirstList();
-
-	switch (choiseFrom(countMenuItem0))
-	{
-	case 1:		//1.Input new List from keyboard
-		secondFillFirstList(head);
-		break;
-	case 2:		//2.Load from file
-		loadFromFile(head);
-		break;
-	case -1:	//3.Exit
-		return;
-	}
-	int isExit = 0;
-	int isSort = 0;
-	while (!isExit)
-	{
-		//system("cls");
-		showFirstList(head);
-		printMenu(menu1,countMenuItem1);
-
-		FirstList *tmpFirstList;
-		SecondList * tmpSecList;
-		SecondList *tmpElem;
-		int numb;
-		char *tmp;
-		int maxIndx, indx, isSuccess;
-		
-
-		switch (choiseFrom(countMenuItem1))
-		{
-		case 1:		//Clear and Input new List from keyboard
-			clearFirstList(head);
-			head = creatHeadFirstList();
-			secondFillFirstList(head);
-			break;
-		case 2:		//2.Clear and Load List from file
-			clearFirstList(head);
-			head = creatHeadFirstList();
-			loadFromFile(head);
-			break;
-		case 3:		//3.Search string in the List
-			printf("Please input serching String?\n>>>");
-			tmp = getInput();
-			tmpSecList = findString(head, tmp);
-			printf("Result is:\n");
-			//showSecondList(tmpSecList);
-			if (tmpSecList != NULL)
-				printf("indx = %d, string \"%s\"\n", tmpSecList->indx, tmpSecList->content);
-			else
-				printf("No one finding...\n");
-			system("pause");
-			free(tmp);
-			break;
-		case 4:		//4.Save DataBase to file
-			saveToFile(head);
-			break;
-		case 5:		//5.Balancing
-			tmpFirstList = balance(head);
-			clearFirstList(head);
-			head = tmpFirstList;
-			isSort = 0;
-			break;
-		case 6:		//6.Insert by indx
-			
-			printf("Input indx and string\n");
-			scanf("%d", &numb);
-			tmpElem = creatElemSecondList();
-			if (tmpElem == NULL)
-			{
-				printf("Sorry, you input wrong string...");
-				system("pause");
-				break;
-			}
-			inputByNumber(head, tmpElem, numb);
-			refreshIndex(head);
-			isSort = 0;
-			break;
-		case 7:		//7.Insert to sort List
-			if (isSort == 1)
-			{
-				printf("Input the new string (Element of List)\n");
-				tmpSecList = creatElemSecondList();
-				if (tmpSecList != NULL)
-				{
-					int numb = findIndexOfInput(head, tmpSecList);
-					inputByNumber(head, tmpSecList, numb);
-					refreshIndex(head);
-				}
-			}
-			else
-			{
-				printf("Your list is not sort. Please sort the List and try again.");
-				system("pause");
-			}
-			break;
-		case 8:		//8.Delete by indx
-			printf("Please input indx of deleting Element?\n");
-			maxIndx = getcountsAllOfSecList(head);
-			indx = getNumber(0, maxIndx);
-			isSuccess = delByIndex(head, indx);
-			if (isSuccess == -1)	// для отладки
-			{
-				printf("BAD NEWS... Do not delete...\n");
-			}
-			
-			system("pause");
-			break;
-		case 9:		//9.Sort
-			
-			tmpFirstList = creatSortOfFirstList(head);
-			clearFirstList(head);
-			head = tmpFirstList;
-			isSort = 1;
-			break;
-		case 10:	//10.Testing
-			testing();
-			break;
-		case 11:	//11.Save and exit
-			saveToFile(head);
-			isExit = 1;
-			break;
-		case -1:	//12.Exit without saving
-			isExit = 1;
-			break;
-		}
-	}
-		
-	system("pause");
-}
-/////////////////////////////////////////////////////////////////////////////
 FirstList * creatHeadFirstList()
 {
 	FirstList * head = (FirstList*)malloc(sizeof(FirstList));
@@ -479,7 +246,6 @@ SecondList * copySecondList(SecondList *Elem)
 	int bufsize = (strlen(Elem->content) + 1);
 	tmp->content = (char *)malloc(sizeof(char)*bufsize);
 	strcpy(tmp->content, Elem->content);
-	//tmp->content = Elem->content;
 	tmp->indx = Elem->indx;
 	tmp->next = NULL;
 	return tmp;
@@ -495,8 +261,6 @@ SecondList * findString(FirstList *head, char * string)
 			if (isEqual(currentSecList, string))
 			{
 				tmp = currentSecList;
-				//showSecondList(currentSecList);
-				//
 			}
 		}
 	}
@@ -506,40 +270,12 @@ SecondList * findString(FirstList *head, char * string)
 
 void addToSecondList(SecondList * head, SecondList* paste)
 {
-	SecondList * current;															//создаем указатель на заголовок
-	
-	for (current = head; current->next != NULL; current = current->next);	//передвигаем указатель пока следующий после текущего элемент не будет ссылаться на NULL
-	
-	current->next = paste;													//копируем в указатель на следующий элемент (который ранее указывал на NULL) текущий элемент
-}
-void fillSecondList(SecondList * headOfSecondList, bool &isBreak)
-{
-	int i = 0;	//создаем счетчик
-	SecondList * start = headOfSecondList;	//создаем указатель на заголовок
-							
-	printf("Please, input the title element of Secondary List?\n>>>");
-	start->content = getInput();//считываем первый элемент(заголовок)
-	i++;
-	while (true)
-	{	
-		int isExit = 0;							//
-		//printf("Continue input?Y(1)/N(0)\n");	// условие выхода из цикла заполнения
-		//scanf("%d", &isExit);					//
-		if (i > 3)						//
-			break;								//
-
-		SecondList * tmp = creatElemSecondList();
-		if (tmp == NULL)
-		{
-			isBreak = true;
-			break;
-		}
-		start->next = tmp;
-		start = start->next;
-
-		i++;
-	}
-
+	//создаем указатель на заголовок
+	SecondList * current;		
+	//передвигаем указатель пока следующий после текущего элемент не будет ссылаться на NULL
+	for (current = head; current->next != NULL; current = current->next);
+	//копируем в указатель на следующий элемент (который ранее указывал на NULL) текущий элемент
+	current->next = paste;
 }
 void secondFillFirstList(FirstList * headOfFirstList)
 {
@@ -581,11 +317,6 @@ void showSecondList(SecondList*head)
 		//printf("%dst element of Secondary List (SecondList) is: %s\n",current->indx, current->content);
 		printf(" [%s] ->", current->content);
 	}
-}
-void showOneFirstList(FirstList * head)
-{
-	printf("Output elemnts of FirstList:\n");
-	showSecondList(head->headOFSecondList);
 }
 bool isExit(const char * s)
 {
@@ -708,7 +439,7 @@ int delByIndex(FirstList *&head, int indx)
 	FLptr = findPtrFirstListForDel(head, indx);		//и устанавливаем индекс
 
 	//проверяем на то, что внутри этого списка элементов находится единственный элемент
-	if (FLptr->contain == 1)		//&& indx == 0
+	if (FLptr->contain == 1)		
 	{
 		//удаляем элемент второго уровня
 		clearSecondList(FLptr->headOFSecondList);
@@ -732,9 +463,6 @@ int delByIndex(FirstList *&head, int indx)
 				return 0;
 			}
 			// очищаем список состоящий теперь из одного элемента
-			/*free(FLptr->headOFSecondList->content);
-			free(FLptr->headOFSecondList);
-			free(FLptr);*/
 			clearFirstList(FLptr);
 			refreshIndex(head);
 			return 0;
@@ -742,16 +470,14 @@ int delByIndex(FirstList *&head, int indx)
 		
 		//проверку на заглавность удаляемого элемента проведена, значит все последующие будут не заглавными (у которых сущ предыд элементы)
 		//если существует следующий элемент(то есть это середина), то приводим все связи в соответствие
-		FirstList * tmp1, tmp2;
 		if (FLptr->next != NULL)
 		{
-			
 			FLptr->next->prev = FLptr->prev;
 		}
-
 		FLptr->prev->next = FLptr->next;
 		
 		free(FLptr);
+		return 0;
 	}
 	else
 	{
@@ -760,7 +486,6 @@ int delByIndex(FirstList *&head, int indx)
 		{
 			tmp = FLptr->headOFSecondList;
 			FLptr->headOFSecondList = tmp->next;
-			//clearSecondList(tmp);
 			free(tmp->content);
 			free(tmp);
 			FLptr->contain--;
@@ -776,7 +501,6 @@ int delByIndex(FirstList *&head, int indx)
 			}
 			tmp1 = tmp->next;
 			tmp->next = tmp1->next;
-			//clearSecondList(tmp1);
 			free(tmp1->content);
 			free(tmp1);
 			FLptr->contain--;
@@ -784,9 +508,6 @@ int delByIndex(FirstList *&head, int indx)
 			return 0;
 		}
 	}
-
-	
-
 }
 int getcountsAllOfSecList(FirstList * head)
 {
