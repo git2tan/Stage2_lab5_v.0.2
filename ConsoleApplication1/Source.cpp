@@ -848,7 +848,7 @@ void testing()
 
 	head = creatHeadFirstList();
 	tmpHead = head;
-
+	//заполнение
 	unsigned int start_time = clock();
 	for (int i = 0; i < n; i++)
 	{
@@ -860,8 +860,36 @@ void testing()
 	unsigned int result = end_time - start_time;
 	printf("Time to creat and input %d elements = %ld\n", n, result);
 
-	system("pause");
+	//удаление 0-го элемента
 
+	start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		//b = getcountsAllOfSecList(head);
+		//a = rand() % b;
+		delByIndex(head, 0);
+	}
+	end_time = clock();
+	result = end_time - start_time;
+	printf("Time to %d delete [0] element = %ld\n", n, result);
+	
+	head = creatHeadFirstList();
+	tmpHead = head;
+	//заполнение
+	start_time = clock();
+	for (int i = 0; i < n; i++)
+	{
+		SecondList * tmp = creatElemSecListEmpty();
+		tmpHead = addToTailOfLists(tmpHead, tmp);
+	}
+
+	end_time = clock();
+	result = end_time - start_time;
+	printf("Time to creat and input %d elements = %ld\n", n, result);
+	
+	
+
+	//удаление по рандомному номеру
 	int a, b;
 	start_time = clock();
 	for (int i = 0; i < n; i++)
@@ -873,6 +901,7 @@ void testing()
 	end_time = clock();
 	result = end_time - start_time;
 	printf("Time to %d delete random element = %ld\n", n, result);
+
 	system("pause");
 }
 

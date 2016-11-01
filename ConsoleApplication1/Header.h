@@ -8,18 +8,17 @@
 
 struct SecondList
 {
-	SecondList * next;
-	char * content;
-	int indx;
+	SecondList * next;	//указатель на следующий элемент
+	char * content;		//указатель на строку (динамическую)
+	int indx;			//индекс текущего  элемента
 };
 struct FirstList
 {
-	FirstList * next;
-	FirstList * prev;
-	SecondList * headOFSecondList;
-	//static int counts;
-	int contain;
-	int max;
+	FirstList * next;				//указатель на следующий элемент такого же типа
+	FirstList * prev;				//указатель на предыдущий элемент такого же типа
+	SecondList * headOFSecondList;	//указатель на первый элемент списка элементов второго типа
+	int contain;					//количество уже содержащихся элементов второго типа
+	int max;						//макисмальное количесвто элементов второго типа разрешенных в этом элементе
 };
 
 FirstList * creatHeadFirstList(); /*	функция возвращает указатель на память выделенную под созданный первый элемент списка первого уровня
